@@ -4,46 +4,6 @@ import (
 	"fmt"
 )
 
-func nChooseK(n, k int) [][]bool {
-	if n < k || n == 0 {
-		return [][]bool{}
-	}
-	if k == 0 {
-		return [][]bool{make([]bool, n)}
-	}
-	if n == k {
-		res := make([]bool, n)
-		for i := range res {
-			res[i] = true
-		}
-		return [][]bool{res}
-	}
-	if k == 1 {
-		res := make([][]bool, n)
-		for i := range res {
-			res[i] = make([]bool, n)
-			res[i][i] = true
-		}
-		return res
-	}
-	half := n / 2
-	remain := n - n/2
-	res := make([][]bool, 0)
-	for i := 0; i <= k && i <= half; i++ {
-		left := nChooseK(half, i)
-		right := nChooseK(remain, k-i)
-		for il := range left {
-			for ir := range right {
-				temp := make([]bool, n)
-				copy(temp[:half], left[il])
-				copy(temp[half:], right[ir])
-				res = append(res, temp)
-			}
-		}
-	}
-	return res
-}
-
 func uniquePathsWithObstacles(obstacleGrid [][]int) int {
 	if len(obstacleGrid) == 0 || len(obstacleGrid[0]) == 0 {
 		return 0
@@ -53,33 +13,52 @@ func uniquePathsWithObstacles(obstacleGrid [][]int) int {
 	if obstacleGrid[rows-1][cols-1] == 1 || obstacleGrid[0][0] == 1 {
 		return 0
 	}
-	if rows == 1 && cols == 1 {
-		return 1
-	}
-	choice := nChooseK(rows-1+cols-1, rows-1)
-	count := 0
-	for _, ch := range choice {
-		r, c := 0, 0
-		finished := true
-		for _, one := range ch {
-			if one {
-				r++
+
+	for i := 0; i < rows-1; i++ {
+		for j := 0; j < cols-1; j++ {
+			if obstacleGrid[i][j] == 1 {
+				obstacleGrid[i][j] = 0
 			} else {
-				c++
+				obstacleGrid[i][j] = -1
 			}
-			if obstacleGrid[r][c] == 1 {
-				finished = false
-				break
-			}
-		}
-		if finished {
-			count++
 		}
 	}
-	return count
+	obstacleGrid[rows-1][cols-1] = 1
+	for j := cols - 2; j >= 0; j-- {
+		if obstacleGrid[rows-1][j] != 1 {
+			obstacleGrid[rows-1][j] = obstacleGrid[rows-1][j+1]
+		} else {
+			obstacleGrid[rows-1][j] = 0
+		}
+	}
+	for i := rows - 2; i >= 0; i-- {
+		if obstacleGrid[i][cols-1] != 1 {
+			obstacleGrid[i][cols-1] = obstacleGrid[i+1][cols-1]
+		} else {
+			obstacleGrid[i][cols-1] = 0
+		}
+	}
+
+	for r, c := rows-2, cols-2; r >= 0 && c >= 0; r, c = r-1, c-1 {
+		if obstacleGrid[r][c] == -1 {
+			obstacleGrid[r][c] = obstacleGrid[r+1][c] + obstacleGrid[r][c+1]
+		}
+		for i := r - 1; i >= 0; i-- {
+			if obstacleGrid[i][c] == -1 {
+				obstacleGrid[i][c] = obstacleGrid[i+1][c] + obstacleGrid[i][c+1]
+			}
+		}
+		for j := c - 1; j >= 0; j-- {
+			if obstacleGrid[r][j] == -1 {
+				obstacleGrid[r][j] = obstacleGrid[r+1][j] + obstacleGrid[r][j+1]
+			}
+		}
+	}
+
+	return obstacleGrid[0][0]
 }
 
 func main() {
-	obstacle := [][]int{{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0}, {1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1}, {0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0}, {1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}, {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1}, {1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1}, {0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1}, {1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1}, {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0}}
+	obstacle := [][]int{{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}
 	fmt.Println(uniquePathsWithObstacles(obstacle))
 }
