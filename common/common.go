@@ -1,7 +1,9 @@
 package common
 
 import (
+	"container/list"
 	"fmt"
+	"strconv"
 )
 
 // Definition for singly-linked list.
@@ -33,4 +35,21 @@ type TreeNode struct {
 	Val   int
 	Left  *TreeNode
 	Right *TreeNode
+}
+
+func (root *TreeNode) Print() {
+	res := []string{}
+	l := list.New()
+	l.PushBack(root)
+	for e := l.Front(); e != nil; e = e.Next() {
+		nowPtr := e.Value.(*TreeNode)
+		if nowPtr == nil {
+			res = append(res, "null")
+		} else {
+			res = append(res, strconv.FormatInt(int64(nowPtr.Val), 10))
+			l.PushBack(nowPtr.Left)
+			l.PushBack(nowPtr.Right)
+		}
+	}
+	fmt.Println(res)
 }
