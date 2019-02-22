@@ -53,3 +53,9 @@ func (root *TreeNode) Print() {
 	}
 	fmt.Println(res)
 }
+
+// Definition for a point.
+type Point struct {
+	X int
+	Y int
+}
