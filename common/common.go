@@ -54,6 +54,36 @@ func (root *TreeNode) Print() {
 	fmt.Println(res)
 }
 
+// Construct tree from an array
+func ConstructTree(arr []string) *TreeNode {
+	if len(arr) == 0 || arr[0] == "null" {
+		return nil
+	}
+	root := &TreeNode{}
+	temp, _ := strconv.ParseInt(arr[0], 10, 64)
+	root.Val = int(temp)
+
+	search := list.New()
+	search.PushBack(root)
+	nowAt := 1
+	for nowAt < len(arr) && search.Len() > 0 {
+		node := search.Remove(search.Front()).(*TreeNode)
+		if arr[nowAt] != "null" {
+			temp, _ := strconv.ParseInt(arr[nowAt], 10, 64)
+			node.Left = &TreeNode{Val: int(temp)}
+			search.PushBack(node.Left)
+		}
+		nowAt++
+		if nowAt < len(arr) && arr[nowAt] != "null" {
+			temp, _ := strconv.ParseInt(arr[nowAt], 10, 64)
+			node.Right = &TreeNode{Val: int(temp)}
+			search.PushBack(node.Right)
+		}
+		nowAt++
+	}
+	return root
+}
+
 // Definition for a point.
 type Point struct {
 	X int
