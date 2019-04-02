@@ -10,9 +10,10 @@ type NumArray struct {
 
 func Constructor(nums []int) NumArray {
 	res := NumArray{make([]int, len(nums))}
-	for i := range nums {
-		for j := i; j < len(nums); j++ {
-			res.Sums[j] += nums[i]
+	if len(nums) > 0 {
+		res.Sums[0] = nums[0]
+		for i := 1; i < len(nums); i++ {
+			res.Sums[i] = res.Sums[i-1] + nums[i]
 		}
 	}
 	return res
