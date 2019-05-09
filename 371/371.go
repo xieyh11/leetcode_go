@@ -27,10 +27,12 @@ func oneBitSum(a, b, c int) (int, int) {
 	}
 }
 
+var bits uint = 32 << (^uint(0) >> 63)
+
 func getSum(a int, b int) int {
 	res := 0
 	carry := 0
-	for i := uint(0); i < 64; i++ {
+	for i := uint(0); i < bits; i++ {
 		tempR, tempC := oneBitSum(a&1, b&1, carry)
 		carry = tempC
 		res |= (tempR << i)
