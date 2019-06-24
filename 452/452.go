@@ -19,23 +19,31 @@ func (a Ints) Less(i, j int) bool {
 	return a[i][1] < a[j][1]
 }
 
-func recSol(points [][]int) int {
+func recSol(points [][]int, former int) int {
 	if len(points) == 0 {
 		return 0
 	}
-	first := points[0]
-	nextLevel := make([][]int, 0)
-	for i := 0; i < len(points); i++ {
-		if points[i][0] > first[1] {
-			nextLevel = append(nextLevel, points[i])
+	first := []int{}
+	firstGet := -1
+	for i := range points {
+		if points[i][0] > former {
+			first = points[i]
+			firstGet = i
+			break
 		}
 	}
-	return 1 + recSol(nextLevel)
+	if firstGet == -1 {
+		return 0
+	}
+	return 1 + recSol(points[firstGet+1:], first[1])
 }
 
 func findMinArrowShots(points [][]int) int {
+	if len(points) == 0 {
+		return 0
+	}
 	sort.Sort(Ints(points))
-	return recSol(points)
+	return 1 + recSol(points[1:], points[0][1])
 }
 
 func main() {
